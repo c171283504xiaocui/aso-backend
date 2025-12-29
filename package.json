@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "ASO Platform Backend API",
   "main": "index.js",
+
+  "scripts": {
+    "vercel-build": "echo 'Build complete'"
+  },
+  
   "dependencies": {
     "axios": "^1.6.0"
   }
