@@ -1,15 +1,13 @@
-export default function handler(req, res) {
-  // 设置CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
   
-  const { query = '', store = 'appstore', country = 'us' } = req.query;
+  const { query, country = 'us', limit = 20 } = req.query;
   
   if (!query) {
     return res.status(400).json({ 
@@ -18,26 +16,48 @@ export default function handler(req, res) {
     });
   }
   
-  // 模拟搜索结果
-  const results = [
-    {
-      id: Math.floor(Math.random() * 1000000) + 100000,
-      name: query,
-      developer: 'Developer Inc.',
-      rating: (Math.random() * 1.5 + 3.5).toFixed(1),
-      category: 'Apps',
-      rank: Math.floor(Math.random() * 100) + 1,
-      store: store,
-      country: country
+  try {
+    // 使用iTunes Search API
+    const searchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&country=${country}&entity=software&limit=${limit}`;
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+    
+    if (!data.results) {
+      return res.json({
+        success: true,
+        query: query,
+        count: 0,
+        results: []
+      });
     }
-  ];
-  
-  res.status(200).json({
-    success: true,
-    query: query,
-    store: store,
-    country: country,
-    count: results.length,
-    results: results
-  });
+    
+    // 格式化结果
+    const results = data.results.map(app => ({
+      id: app.trackId,
+      bundleId: app.bundleId,
+      name: app.trackName,
+      developer: app.artistName,
+      icon: app.artworkUrl100,
+      rating: app.averageUserRating || 0,
+      ratingCount: app.userRatingCount || 0,
+      price: app.price || 0,
+      category: app.primaryGenreName,
+      description: app.description?.substring(0, 200) + '...',
+      storeUrl: app.trackViewUrl
+    }));
+    
+    res.status(200).json({
+      success: true,
+      query: query,
+      country: country,
+      count: results.length,
+      results: results
+    });
+    
+  } catch (error) {
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
 }
