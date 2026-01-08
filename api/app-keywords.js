@@ -1,289 +1,241 @@
-// 真实的iTunes API集成
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-  
-  const { appId, store = 'appstore', country = 'us' } = req.query;
+  const { appId, country = 'cn' } = req.query;
   
   if (!appId) {
-    return res.status(400).json({ 
-      success: false,
-      error: '请提供应用名称或ID' 
-    });
+    return res.status(400).json({ error: '请提供应用ID' });
   }
   
   try {
-    // 步骤1: 搜索应用（支持应用名称或ID）
-    let appData = null;
+    // 获取应用信息
+    const lookupUrl = `https://itunes.apple.com/lookup?id=${appId}&country=${country}`;
+    const appRes = await fetch(lookupUrl);
+    const appData = await appRes.json();
     
-    // 如果是纯数字，当作ID查询
-    if (/^\d+$/.test(appId)) {
-      const lookupUrl = `https://itunes.apple.com/lookup?id=${appId}&country=${country}&entity=software`;
-      const lookupRes = await fetch(lookupUrl);
-      const lookupData = await lookupRes.json();
-      
-      if (lookupData.results && lookupData.results.length > 0) {
-        appData = lookupData.results[0];
-      }
-    } else {
-      // 按名称搜索
-      const searchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(appId)}&country=${country}&entity=software&limit=1`;
-      const searchRes = await fetch(searchUrl);
-      const searchData = await searchRes.json();
-      
-      if (searchData.results && searchData.results.length > 0) {
-        appData = searchData.results[0];
-      }
+    if (!appData.results || appData.results.length === 0) {
+      return res.status(404).json({ error: '应用不存在' });
     }
     
-    if (!appData) {
-      return res.status(404).json({
-        success: false,
-        error: '未找到该应用，请检查应用名称或ID'
-      });
-    }
+    const app = appData.results[0];
     
-    // 步骤2: 提取应用信息
-    const app = {
-      id: appData.trackId,
-      bundleId: appData.bundleId,
-      name: appData.trackName,
-      developer: appData.artistName,
-      developerId: appData.artistId,
-      icon: appData.artworkUrl512 || appData.artworkUrl100,
-      rating: appData.averageUserRating || 0,
-      ratingCount: appData.userRatingCount || 0,
-      price: appData.price || 0,
-      category: appData.primaryGenreName,
-      categories: appData.genres || [],
-      description: appData.description,
-      releaseDate: appData.releaseDate,
-      currentVersion: appData.version,
-      size: appData.fileSizeBytes,
-      minimumOsVersion: appData.minimumOsVersion,
-      contentRating: appData.contentAdvisoryRating,
-      store: store,
-      country: country,
-      storeUrl: appData.trackViewUrl
-    };
-    
-    // 步骤3: 分析关键词（从标题、描述、分类提取）
+    // 分析关键词
     const keywords = await analyzeKeywords(app, country);
     
-    // 步骤4: 获取分类排名
-    const rankings = await getCategoryRankings(app, country);
+    // 统计数据
+    const stats = {
+      total: keywords.length,
+      top3: keywords.filter(k => k.rank <= 3).length,
+      top10: keywords.filter(k => k.rank <= 10).length,
+      top20: keywords.filter(k => k.rank <= 20).length,
+      top50: keywords.filter(k => k.rank <= 50).length,
+      
+      // 搜索指数分布
+      highIndex: keywords.filter(k => k.searchIndex >= 8000).length,
+      mediumIndex: keywords.filter(k => k.searchIndex >= 5000 && k.searchIndex < 8000).length,
+      lowIndex: keywords.filter(k => k.searchIndex < 5000).length,
+      
+      // 总流量
+      totalTraffic: keywords.reduce((sum, k) => sum + k.traffic, 0),
+      
+      // 覆盖度评分
+      coverageScore: calculateCoverageScore(keywords)
+    };
     
-    // 计算统计数据
-    const top10Count = keywords.filter(k => k.rank <= 10).length;
-    const top20Count = keywords.filter(k => k.rank <= 20).length;
-    const coverage = Math.floor((top10Count / keywords.length) * 100);
-    
-    res.status(200).json({
+    res.json({
       success: true,
-      app: app,
+      appId: appId,
+      appName: app.trackName,
       country: country,
-      store: store,
       keywords: keywords,
-      rankings: rankings,
-      statistics: {
-        totalKeywords: keywords.length,
-        top10Keywords: top10Count,
-        top20Keywords: top20Count,
-        coverage: coverage,
-        averageRank: Math.floor(keywords.reduce((sum, k) => sum + k.rank, 0) / keywords.length),
-        totalTraffic: keywords.reduce((sum, k) => sum + k.traffic, 0)
-      },
+      statistics: stats,
       timestamp: new Date().toISOString()
     });
     
   } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ 
-      success: false,
-      error: error.message 
-    });
+    res.status(500).json({ error: error.message });
   }
 }
 
-// 分析关键词
 async function analyzeKeywords(app, country) {
   const keywords = [];
   
-  // 从应用标题和描述中提取关键词
-  const text = `${app.name} ${app.description}`.toLowerCase();
-  const words = text.match(/\b[a-z]{3,}\b/g) || [];
+  // 生成关键词列表
+  const candidateKeywords = generateKeywords(app);
   
-  // 常见的ASO关键词
-  const commonKeywords = [
-    'app', 'free', 'best', 'pro', 'plus', 'new', 'update',
-    app.category.toLowerCase(),
-    ...app.categories.map(c => c.toLowerCase()),
-    ...app.name.toLowerCase().split(' ').filter(w => w.length > 2)
-  ];
-  
-  // 根据分类生成相关关键词
-  const categoryKeywords = generateCategoryKeywords(app.category);
-  
-  // 合并所有关键词
-  const allKeywords = [...new Set([...commonKeywords, ...categoryKeywords])];
-  
-  // 为每个关键词生成数据
-  for (const keyword of allKeywords.slice(0, 50)) {
-    // 在iTunes搜索这个关键词，看应用排第几
-    const rank = await searchKeywordRank(keyword, app.id, country);
-    
-    if (rank > 0 && rank <= 200) {
-      keywords.push({
-        keyword: keyword,
-        rank: rank,
-        volume: estimateSearchVolume(keyword, country),
-        difficulty: calculateDifficulty(keyword),
-        trend: Math.floor(Math.random() * 21) - 10,
-        traffic: estimateTraffic(rank, keyword, country),
-        relevance: calculateRelevance(keyword, app)
-      });
+  // 查询每个关键词的排名
+  for (const keyword of candidateKeywords.slice(0, 100)) {
+    try {
+      const rank = await getKeywordRank(keyword, app.trackId, country);
+      
+      if (rank > 0 && rank <= 200) {
+        const searchIndex = estimateSearchIndex(keyword, country);
+        const difficulty = calculateDifficulty(keyword, searchIndex);
+        
+        keywords.push({
+          keyword: keyword,
+          rank: rank,
+          searchIndex: searchIndex,
+          difficulty: difficulty,
+          traffic: calculateTraffic(rank, searchIndex),
+          change: Math.floor(Math.random() * 11) - 5, // -5 到 +5
+          relevance: calculateRelevance(keyword, app)
+        });
+      }
+      
+      // 避免请求过快
+      await sleep(100);
+      
+    } catch (error) {
+      console.error(`Error analyzing keyword ${keyword}:`, error);
     }
   }
   
   // 按排名排序
   keywords.sort((a, b) => a.rank - b.rank);
   
-  return keywords.slice(0, 30);
+  return keywords.slice(0, 50);
 }
 
-// 搜索关键词排名
-async function searchKeywordRank(keyword, appId, country) {
+function generateKeywords(app) {
+  const keywords = new Set();
+  
+  // 从应用名称提取
+  const nameWords = app.trackName.toLowerCase().split(/[\s\-_]+/);
+  nameWords.forEach(word => {
+    if (word.length >= 3) keywords.add(word);
+  });
+  
+  // 从描述提取常见词
+  const description = app.description.toLowerCase();
+  const words = description.match(/\b[a-z\u4e00-\u9fa5]{3,10}\b/g) || [];
+  
+  // 词频统计
+  const wordFreq = {};
+  words.forEach(word => {
+    wordFreq[word] = (wordFreq[word] || 0) + 1;
+  });
+  
+  // 取频率最高的词
+  const topWords = Object.entries(wordFreq)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 30)
+    .map(([word]) => word);
+  
+  topWords.forEach(word => keywords.add(word));
+  
+  // 根据分类添加相关词
+  const categoryKeywords = getCategoryKeywords(app.primaryGenreName);
+  categoryKeywords.forEach(word => keywords.add(word));
+  
+  return Array.from(keywords);
+}
+
+function getCategoryKeywords(category) {
+  const map = {
+    '效率': ['办公', '工具', '效率', '笔记', '任务', '日程', '提醒', '清单'],
+    '社交': ['聊天', '社交', '交友', '通讯', '即时', '消息', '视频', '语音'],
+    '游戏': ['游戏', '娱乐', '休闲', '动作', '冒险', '策略', '竞技'],
+    '摄影与录像': ['相机', '照片', '美颜', '滤镜', '编辑', '拍照', '图片'],
+    '工具': ['工具', '实用', '助手', '管家', '优化', '清理', '安全']
+  };
+  
+  for (const [key, words] of Object.entries(map)) {
+    if (category.includes(key) || key.includes(category)) {
+      return words;
+    }
+  }
+  
+  return ['app', '应用', '软件'];
+}
+
+async function getKeywordRank(keyword, appId, country) {
   try {
     const searchUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(keyword)}&country=${country}&entity=software&limit=200`;
     const response = await fetch(searchUrl);
     const data = await response.json();
     
     if (data.results) {
-      const index = data.results.findIndex(app => app.trackId === appId);
+      const index = data.results.findIndex(app => app.trackId == appId);
       return index >= 0 ? index + 1 : 0;
     }
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('Rank search error:', error);
   }
   return 0;
 }
 
-// 根据分类生成关键词
-function generateCategoryKeywords(category) {
-  const keywordMap = {
-    'Productivity': ['productivity', 'task', 'todo', 'note', 'planner', 'organizer', 'calendar', 'reminder', 'schedule', 'workflow', 'project', 'team', 'collaboration'],
-    'Social Networking': ['social', 'chat', 'messenger', 'friends', 'community', 'networking', 'connect', 'share', 'post', 'feed', 'message'],
-    'Entertainment': ['entertainment', 'fun', 'video', 'music', 'streaming', 'watch', 'listen', 'media', 'player', 'content'],
-    'Games': ['game', 'play', 'puzzle', 'action', 'adventure', 'strategy', 'arcade', 'casual', 'multiplayer', 'online'],
-    'Photo & Video': ['photo', 'video', 'camera', 'edit', 'filter', 'gallery', 'album', 'picture', 'image', 'collage'],
-    'Health & Fitness': ['health', 'fitness', 'workout', 'exercise', 'nutrition', 'diet', 'weight', 'tracker', 'wellness', 'meditation'],
-    'Finance': ['finance', 'money', 'budget', 'expense', 'banking', 'payment', 'investment', 'wallet', 'bill', 'saving'],
-    'Education': ['education', 'learning', 'study', 'school', 'course', 'lesson', 'language', 'quiz', 'test', 'teaching'],
-    'Utilities': ['utility', 'tool', 'helper', 'manager', 'cleaner', 'optimizer', 'scanner', 'converter', 'reader'],
-    'Shopping': ['shopping', 'shop', 'buy', 'store', 'deal', 'sale', 'discount', 'product', 'order', 'delivery']
+function estimateSearchIndex(keyword, country) {
+  // 搜索指数（类似点点数据的搜索热度）
+  const baseIndex = {
+    'cn': 10000,
+    'us': 12000,
+    'jp': 8000,
+    'kr': 7000
   };
   
-  for (const [cat, keywords] of Object.entries(keywordMap)) {
-    if (category.includes(cat)) {
-      return keywords;
-    }
-  }
-  
-  return ['app', 'mobile', 'iphone', 'ipad'];
-}
-
-// 估算搜索量
-function estimateSearchVolume(keyword, country) {
-  const baseVolume = {
-    'us': 1.0,
-    'cn': 0.8,
-    'jp': 0.6,
-    'kr': 0.5,
-    'gb': 0.7,
-    'de': 0.6,
-    'fr': 0.6
-  };
-  
-  const multiplier = baseVolume[country] || 0.5;
+  const base = baseIndex[country] || 8000;
   const length = keyword.length;
   
-  // 短关键词搜索量通常更高
-  let base = 100000;
-  if (length <= 5) base = 150000;
-  if (length <= 8) base = 100000;
-  else base = 50000;
+  // 短词搜索量高
+  let multiplier = 1.0;
+  if (length <= 3) multiplier = 1.5;
+  else if (length <= 5) multiplier = 1.2;
+  else if (length > 8) multiplier = 0.7;
   
-  return Math.floor((base + Math.random() * 50000) * multiplier);
+  return Math.floor(base * multiplier * (0.5 + Math.random() * 0.5));
 }
 
-// 计算难度
-function calculateDifficulty(keyword) {
-  const length = keyword.length;
+function calculateDifficulty(keyword, searchIndex) {
+  // 难度 = 搜索指数高 + 关键词短
   let difficulty = 50;
   
-  // 短关键词竞争更激烈
-  if (length <= 5) difficulty = 80;
-  else if (length <= 8) difficulty = 65;
-  else difficulty = 45;
+  if (searchIndex > 8000) difficulty += 20;
+  if (searchIndex > 10000) difficulty += 15;
+  if (keyword.length <= 4) difficulty += 15;
   
-  return difficulty + Math.floor(Math.random() * 15);
+  return Math.min(100, difficulty);
 }
 
-// 估算流量
-function estimateTraffic(rank, keyword, country) {
-  const volume = estimateSearchVolume(keyword, country);
-  
-  // 排名越高，获得的流量比例越大
+function calculateTraffic(rank, searchIndex) {
+  // 根据排名和搜索指数计算流量
   let ctr = 0;
-  if (rank === 1) ctr = 0.35;
-  else if (rank <= 3) ctr = 0.20;
-  else if (rank <= 5) ctr = 0.10;
-  else if (rank <= 10) ctr = 0.05;
-  else if (rank <= 20) ctr = 0.02;
-  else if (rank <= 50) ctr = 0.01;
-  else ctr = 0.005;
+  if (rank === 1) ctr = 0.40;
+  else if (rank <= 3) ctr = 0.25;
+  else if (rank <= 5) ctr = 0.15;
+  else if (rank <= 10) ctr = 0.08;
+  else if (rank <= 20) ctr = 0.04;
+  else if (rank <= 50) ctr = 0.02;
+  else ctr = 0.01;
   
-  return Math.floor(volume * ctr);
+  return Math.floor(searchIndex * ctr);
 }
 
-// 计算相关度
 function calculateRelevance(keyword, app) {
-  const name = app.name.toLowerCase();
+  const name = app.trackName.toLowerCase();
   const desc = app.description.toLowerCase();
   
-  if (name.includes(keyword)) return 'high';
-  if (desc.includes(keyword)) return 'medium';
-  return 'low';
+  if (name.includes(keyword)) return 100;
+  if (desc.substring(0, 200).includes(keyword)) return 80;
+  if (desc.includes(keyword)) return 60;
+  return 40;
 }
 
-// 获取分类排名
-async function getCategoryRankings(app, country) {
-  try {
-    const categoryUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(app.category)}&country=${country}&entity=software&limit=200`;
-    const response = await fetch(categoryUrl);
-    const data = await response.json();
-    
-    if (data.results) {
-      const categoryRank = data.results.findIndex(a => a.trackId === app.id) + 1;
-      
-      return {
-        overall: Math.floor(Math.random() * 500) + 50,
-        category: categoryRank > 0 ? categoryRank : Math.floor(Math.random() * 50) + 1,
-        categoryName: app.category
-      };
-    }
-  } catch (error) {
-    console.error('Category rank error:', error);
-  }
+function calculateCoverageScore(keywords) {
+  // 覆盖度评分算法
+  let score = 0;
   
-  return {
-    overall: Math.floor(Math.random() * 500) + 50,
-    category: Math.floor(Math.random() * 50) + 1,
-    categoryName: app.category
-  };
+  // Top10 关键词权重最高
+  score += keywords.filter(k => k.rank <= 10).length * 10;
+  score += keywords.filter(k => k.rank <= 20).length * 5;
+  score += keywords.filter(k => k.rank <= 50).length * 2;
+  
+  // 高搜索指数关键词加分
+  score += keywords.filter(k => k.searchIndex >= 8000).length * 8;
+  
+  return Math.min(100, score);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
