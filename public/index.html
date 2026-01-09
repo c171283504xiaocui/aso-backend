@@ -845,4 +845,165 @@
                     <div class="competitor-info">
                         <div class="competitor-name">${comp.name}</div>
                         <div class="competitor-meta">
-                            ${comp.developer} · ⭐ ${comp.rating.toFixed(1)} ·
+                            ${comp.developer} · ⭐ ${comp.rating.toFixed(1)} · 排名 #${comp.estimatedRank}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 12px; color: #6b7280;">关键词重叠</div>
+                        <div style="font-size: 20px; font-weight: bold; color: #3b82f6;">${comp.overlap}%</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function filterKeywords(type) {
+            // 更新筛选按钮状态
+            document.querySelectorAll('.filter-chip').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            let filtered = allKeywords;
+
+            switch(type) {
+                case 'top3':
+                    filtered = allKeywords.filter(k => k.rank <= 3);
+                    break;
+                case 'top10':
+                    filtered = allKeywords.filter(k => k.rank <= 10);
+                    break;
+                case 'top20':
+                    filtered = allKeywords.filter(k => k.rank <= 20);
+                    break;
+                case 'high':
+                    filtered = allKeywords.filter(k => k.searchIndex >= 8000);
+                    break;
+                case 'low-diff':
+                    filtered = allKeywords.filter(k => k.difficulty < 50);
+                    break;
+            }
+
+            displayKeywords(filtered);
+        }
+
+        function switchTab(tabName) {
+            // 更新标签按钮
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 切换内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // 加载对应数据
+            if (tabName === 'reviews' && currentAppData) {
+                loadReviews();
+            }
+        }
+
+        async function loadReviews() {
+            const reviewsDiv = document.getElementById('reviewsList');
+            reviewsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载评论中...</div></div>';
+
+            try {
+                const appId = currentAppData.detail.appId;
+                const country = document.getElementById('countrySelect').value;
+                
+                const response = await fetch(`${API_BASE}/api/reviews?appId=${appId}&country=${country}`);
+                const data = await response.json();
+
+                if (data.success && data.reviews.length > 0) {
+                    let html = '<h3 style="margin-bottom: 20px;">最新用户评论</h3>';
+                    
+                    // 情感分析统计
+                    html += `
+                        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280;">总评论数</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #1f2937;">${data.sentiment.total}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280;">好评率</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #10b981;">${data.sentiment.positiveRate}%</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280;">好评</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #10b981;">${data.sentiment.positive}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 12px; color: #6b7280;">差评</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #ef4444;">${data.sentiment.negative}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // 评论列表
+                    data.reviews.forEach(review => {
+                        const stars = '⭐'.repeat(review.rating);
+                        html += `
+                            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <div>
+                                        <span style="font-weight: 600;">${review.author}</span>
+                                        <span style="margin-left: 10px; color: #f59e0b;">${stars}</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #6b7280;">${new Date(review.date).toLocaleDateString()}</div>
+                                </div>
+                                <div style="font-weight: 600; margin-bottom: 6px;">${review.title}</div>
+                                <div style="color: #6b7280; line-height: 1.6;">${review.content}</div>
+                                ${review.version ? `<div style="font-size: 11px; color: #9ca3af; margin-top: 8px;">版本 ${review.version}</div>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    reviewsDiv.innerHTML = html;
+                } else {
+                    reviewsDiv.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">💬</div>
+                            <div class="empty-title">暂无评论数据</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Load reviews error:', error);
+                reviewsDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-title">加载失败</div>
+                        <div class="empty-desc">${error.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('appOverview').style.display = 'none';
+            document.getElementById('tabsContainer').style.display = 'none';
+            document.getElementById('loadingState').style.display = 'block';
+        }
+
+        function showEmpty() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('appOverview').style.display = 'none';
+            document.getElementById('tabsContainer').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'block';
+        }
+
+        // 回车搜索
+        document.getElementById('appInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchApp(e);
+            }
+        });
+    </script>
+</body>
+</html>
