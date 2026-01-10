@@ -3,355 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASO数据分析平台 - 专业版</title>
+    <title>ASO数据分析平台</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #f5f7fa;
+            padding: 20px;
         }
         
-        /* 顶部导航 */
-        .navbar {
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 0 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 60px;
-        }
-        
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .nav-menu {
-            display: flex;
-            gap: 30px;
-        }
-        
-        .nav-item {
-            color: #6b7280;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 0;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-        }
-        
-        .nav-item:hover, .nav-item.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
-        }
-        
-        /* 主容器 */
         .container {
-            max-width: 1400px;
-            margin: 20px auto;
-            padding: 0 20px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
-        /* 搜索框 */
-        .search-panel {
-            background: white;
-            border-radius: 12px;
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 30px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
         }
         
-        .search-form {
-            display: flex;
-            gap: 12px;
-            align-items: end;
+        .search-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         
-        .form-group {
-            flex: 1;
+        .input-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #d1d5db;
+        input, select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 14px;
-            transition: all 0.2s;
         }
         
-        .form-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .btn-primary {
-            padding: 10px 28px;
+        .btn {
+            padding: 12px 30px;
             background: #3b82f6;
             color: white;
             border: none;
             border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
+            font-size: 14px;
         }
         
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-        
-        .btn-primary:disabled {
+        .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
         
-        /* 应用概览卡片 */
-        .app-overview {
+        .result-box {
             background: white;
+            padding: 25px;
             border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             display: none;
         }
         
-        .app-header {
+        .app-info {
             display: flex;
-            gap: 20px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid #f3f4f6;
-            margin-bottom: 25px;
-        }
-        
-        .app-icon {
-            width: 120px;
-            height: 120px;
-            border-radius: 24px;
-            object-fit: cover;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .app-main-info h1 {
-            font-size: 26px;
-            font-weight: bold;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-        
-        .app-developer {
-            color: #6b7280;
-            font-size: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .app-badges {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .badge {
-            display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: #f3f4f6;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
-        .badge-rating { background: #fef3c7; color: #92400e; }
-        .badge-category { background: #e0e7ff; color: #3730a3; }
-        .badge-price { background: #d1fae5; color: #065f46; }
-        
-        /* 数据卡片网格 */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
             margin-bottom: 20px;
         }
         
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.2s;
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
-        .stat-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
         }
         
         .stat-label {
             font-size: 13px;
             color: #6b7280;
             margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
         
         .stat-value {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             color: #1f2937;
         }
         
-        .stat-change {
-            font-size: 12px;
-            margin-top: 6px;
-        }
-        
-        .stat-change.up { color: #10b981; }
-        .stat-change.down { color: #ef4444; }
-        
-        /* 标签页 */
-        .tabs {
-            background: white;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .tab-header {
-            display: flex;
+        .keyword-item {
+            display: grid;
+            grid-template-columns: 2fr 80px 120px 80px 100px;
+            gap: 15px;
+            padding: 15px;
             border-bottom: 1px solid #f3f4f6;
-            padding: 0 20px;
+            align-items: center;
         }
         
-        .tab-btn {
-            padding: 16px 24px;
-            background: none;
-            border: none;
-            color: #6b7280;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            position: relative;
-            transition: color 0.2s;
-        }
-        
-        .tab-btn:hover {
-            color: #3b82f6;
-        }
-        
-        .tab-btn.active {
-            color: #3b82f6;
-        }
-        
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #3b82f6;
-        }
-        
-        .tab-content {
-            padding: 25px;
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        /* 关键词表格 */
-        .keyword-filters {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-chip {
-            padding: 6px 14px;
-            background: #f3f4f6;
-            border: none;
-            border-radius: 16px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .filter-chip:hover {
-            background: #e5e7eb;
-        }
-        
-        .filter-chip.active {
-            background: #3b82f6;
-            color: white;
-        }
-        
-        .table-wrapper {
-            overflow-x: auto;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .data-table thead {
+        .keyword-header {
+            display: grid;
+            grid-template-columns: 2fr 80px 120px 80px 100px;
+            gap: 15px;
+            padding: 15px;
             background: #f9fafb;
+            font-weight: bold;
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
         
-        .data-table th {
-            padding: 12px 16px;
-            text-align: left;
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-box {
+            background: #fee;
+            border: 2px solid #fcc;
+            color: #c33;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .debug-info {
+            background: #f0f9ff;
+            border: 2px solid #bae6fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
             font-size: 12px;
-            font-weight: 600;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .data-table td {
-            padding: 14px 16px;
-            border-top: 1px solid #f3f4f6;
-            font-size: 14px;
-        }
-        
-        .data-table tr:hover {
-            background: #f9fafb;
-        }
-        
-        .keyword-name {
-            font-weight: 600;
-            color: #1f2937;
+            font-family: monospace;
+            color: #0c4a6e;
         }
         
         .rank-badge {
@@ -359,651 +180,266 @@
             padding: 4px 10px;
             border-radius: 12px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: bold;
         }
         
-        .rank-1-3 { background: #d1fae5; color: #065f46; }
-        .rank-4-10 { background: #fef3c7; color: #92400e; }
-        .rank-11-50 { background: #e5e7eb; color: #374151; }
-        
-        .search-index-bar {
-            width: 100%;
-            max-width: 100px;
-            height: 6px;
-            background: #f3f4f6;
-            border-radius: 3px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .search-index-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            border-radius: 3px;
-        }
-        
-        .difficulty-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
-        .diff-low { background: #d1fae5; color: #065f46; }
-        .diff-medium { background: #fef3c7; color: #92400e; }
-        .diff-high { background: #fee2e2; color: #991b1b; }
-        
-        /* 图表容器 */
-        .chart-container {
-            height: 300px;
-            margin-top: 20px;
-        }
-        
-        /* 竞品卡片 */
-        .competitor-card {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 16px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            transition: all 0.2s;
-        }
-        
-        .competitor-card:hover {
-            background: #f3f4f6;
-        }
-        
-        .competitor-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            object-fit: cover;
-        }
-        
-        .competitor-info {
-            flex: 1;
-        }
-        
-        .competitor-name {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-        
-        .competitor-meta {
-            font-size: 13px;
-            color: #6b7280;
-        }
-        
-        /* 加载状态 */
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6b7280;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f4f6;
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* 空状态 */
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-        }
-        
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-        
-        .empty-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-        
-        .empty-desc {
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        /* 响应式 */
-        @media (max-width: 768px) {
-            .search-form {
-                flex-direction: column;
-            }
-            
-            .app-header {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .tab-header {
-                overflow-x: auto;
-            }
-        }
+        .rank-top10 { background: #d1fae5; color: #065f46; }
+        .rank-top20 { background: #fef3c7; color: #92400e; }
+        .rank-other { background: #e5e7eb; color: #374151; }
     </style>
 </head>
 <body>
-    <!-- 顶部导航 -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <span>📊</span>
-                <span>ASO数据平台</span>
-            </div>
-            <div class="nav-menu">
-                <a href="#" class="nav-item active">应用分析</a>
-                <a href="#" class="nav-item">关键词工具</a>
-                <a href="#" class="nav-item">榜单排名</a>
-                <a href="#" class="nav-item">竞品监控</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- 主容器 -->
     <div class="container">
-        <!-- 搜索面板 -->
-        <div class="search-panel">
-            <form class="search-form" onsubmit="searchApp(event)">
-                <div class="form-group" style="flex: 2;">
-                    <label>应用名称 / App ID</label>
-                    <input type="text" 
-                           class="form-input" 
-                           id="appInput"
-                           placeholder="输入应用名称或App ID，如：微信、414478124">
-                </div>
-                <div class="form-group">
-                    <label>国家/地区</label>
-                    <select class="form-input" id="countrySelect">
-                        <option value="cn">🇨🇳 中国</option>
-                        <option value="us">🇺🇸 美国</option>
-                        <option value="jp">🇯🇵 日本</option>
-                        <option value="kr">🇰🇷 韩国</option>
-                        <option value="hk">🇭🇰 香港</option>
-                        <option value="tw">🇹🇼 台湾</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-primary" id="searchBtn">
-                    🔍 搜索分析
-                </button>
-            </form>
+        <div class="header">
+            <h1 style="font-size: 28px; margin-bottom: 10px;">📊 ASO数据分析平台</h1>
+            <p style="opacity: 0.9;">专业的应用商店优化工具（调试版）</p>
         </div>
 
-        <!-- 加载状态 -->
-        <div id="loadingState" class="loading" style="display: none;">
-            <div class="spinner"></div>
-            <div>正在加载应用数据...</div>
+        <div class="search-box">
+            <div class="input-group">
+                <input type="text" id="appInput" placeholder="输入应用名称或App ID（如：微信、414478124）">
+                <select id="countrySelect">
+                    <option value="cn">🇨🇳 中国</option>
+                    <option value="us">🇺🇸 美国</option>
+                    <option value="jp">🇯🇵 日本</option>
+                </select>
+                <button class="btn" id="searchBtn" onclick="searchApp()">搜索</button>
+            </div>
+            
+            <div id="debugInfo" class="debug-info" style="display: none;"></div>
         </div>
 
-        <!-- 应用概览 -->
-        <div id="appOverview" class="app-overview">
-            <div class="app-header">
+        <div id="errorBox" class="error-box" style="display: none;"></div>
+
+        <div id="loadingBox" class="result-box">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div>正在加载数据...</div>
+            </div>
+        </div>
+
+        <div id="resultBox" class="result-box">
+            <div class="app-info">
                 <img id="appIcon" class="app-icon" src="" alt="App Icon">
-                <div class="app-main-info">
-                    <h1 id="appName">应用名称</h1>
-                    <div class="app-developer" id="appDeveloper">开发者</div>
-                    <div class="app-badges">
-                        <span class="badge badge-rating">
-                            ⭐ <span id="appRating">0</span> (<span id="ratingCount">0</span>)
-                        </span>
-                        <span class="badge badge-category" id="appCategory">分类</span>
-                        <span class="badge badge-price" id="appPrice">免费</span>
+                <div style="flex: 1;">
+                    <h2 id="appName" style="font-size: 22px; margin-bottom: 5px;">应用名称</h2>
+                    <div id="appDev" style="color: #6b7280; margin-bottom: 10px;">开发者</div>
+                    <div style="display: flex; gap: 15px;">
+                        <span>⭐ <strong id="appRating">0</strong></span>
+                        <span>📁 <strong id="appCategory">分类</strong></span>
                     </div>
                 </div>
             </div>
 
-            <!-- 数据统计 -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-label">📊 总排名</div>
-                    <div class="stat-value" id="overallRank">-</div>
-                    <div class="stat-change up" id="rankChange">-</div>
-                </div>
-                <div class="stat-card">
                     <div class="stat-label">🔑 关键词覆盖</div>
-                    <div class="stat-value" id="keywordCount">-</div>
-                    <div class="stat-change" id="kwTop10">-</div>
+                    <div class="stat-value" id="kwCount">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">📈 搜索流量</div>
-                    <div class="stat-value" id="totalTraffic">-</div>
-                    <div class="stat-change">日均预估</div>
+                    <div class="stat-label">📊 TOP 10</div>
+                    <div class="stat-value" id="kwTop10">0</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">💯 覆盖度评分</div>
-                    <div class="stat-value" id="coverageScore">-</div>
-                    <div class="stat-change" id="scoreDesc">-</div>
+                    <div class="stat-label">📈 总流量</div>
+                    <div class="stat-value" id="totalTraffic">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">💯 覆盖度</div>
+                    <div class="stat-value" id="coverage">0</div>
                 </div>
             </div>
+
+            <h3 style="margin: 25px 0 15px 0; font-size: 18px;">关键词列表</h3>
+            
+            <div class="keyword-header">
+                <div>关键词</div>
+                <div>排名</div>
+                <div>搜索指数</div>
+                <div>难度</div>
+                <div>流量</div>
+            </div>
+
+            <div id="keywordList"></div>
         </div>
 
-        <!-- 标签页 -->
-        <div id="tabsContainer" class="tabs" style="display: none;">
-            <div class="tab-header">
-                <button class="tab-btn active" onclick="switchTab('keywords')">
-                    🔑 关键词列表
-                </button>
-                <button class="tab-btn" onclick="switchTab('ranking')">
-                    📈 排名趋势
-                </button>
-                <button class="tab-btn" onclick="switchTab('competitors')">
-                    🎯 竞品分析
-                </button>
-                <button class="tab-btn" onclick="switchTab('reviews')">
-                    💬 评论分析
-                </button>
-            </div>
-
-            <!-- 关键词标签页 -->
-            <div id="keywordsTab" class="tab-content active">
-                <div class="keyword-filters">
-                    <button class="filter-chip active" onclick="filterKeywords('all')">全部</button>
-                    <button class="filter-chip" onclick="filterKeywords('top3')">TOP 3</button>
-                    <button class="filter-chip" onclick="filterKeywords('top10')">TOP 10</button>
-                    <button class="filter-chip" onclick="filterKeywords('top20')">TOP 20</button>
-                    <button class="filter-chip" onclick="filterKeywords('high')">高搜索指数</button>
-                    <button class="filter-chip" onclick="filterKeywords('low-diff')">低难度</button>
-                </div>
-
-                <div class="table-wrapper">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>关键词</th>
-                                <th>排名</th>
-                                <th>搜索指数</th>
-                                <th>难度</th>
-                                <th>趋势</th>
-                                <th>预估流量</th>
-                            </tr>
-                        </thead>
-                        <tbody id="keywordsTableBody">
-                            <!-- 动态填充 -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 排名趋势标签页 -->
-            <div id="rankingTab" class="tab-content">
-                <div class="chart-container" id="rankingChart">
-                    <div class="empty-state">
-                        <div class="empty-icon">📈</div>
-                        <div class="empty-title">排名趋势图表</div>
-                        <div class="empty-desc">展示应用在过去30天的排名变化</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 竞品分析标签页 -->
-            <div id="competitorsTab" class="tab-content">
-                <div id="competitorsList">
-                    <!-- 动态填充 -->
-                </div>
-            </div>
-
-            <!-- 评论分析标签页 -->
-            <div id="reviewsTab" class="tab-content">
-                <div id="reviewsList">
-                    <div class="empty-state">
-                        <div class="empty-icon">💬</div>
-                        <div class="empty-title">评论分析</div>
-                        <div class="empty-desc">加载中...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 空状态 -->
-        <div id="emptyState" class="app-overview">
-            <div class="empty-state">
-                <div class="empty-icon">🔍</div>
-                <div class="empty-title">开始分析应用</div>
-                <div class="empty-desc">输入应用名称或App ID，获取完整的ASO数据分析</div>
+        <div id="emptyState" class="result-box" style="display: block;">
+            <div style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">🔍</div>
+                <h3 style="font-size: 20px; margin-bottom: 10px;">开始分析应用</h3>
+                <p style="color: #6b7280;">输入应用名称或App ID，获取完整的ASO数据</p>
             </div>
         </div>
     </div>
 
     <script>
         const API_BASE = window.location.origin;
-        let currentAppData = null;
-        let allKeywords = [];
         let isLoading = false;
 
-        async function searchApp(event) {
-            event.preventDefault();
-            
-            if (isLoading) return;
+        function log(message, data) {
+            console.log(message, data);
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${message}</div>`;
+            if (data) {
+                debugDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2).substring(0, 500)}</pre>`;
+            }
+        }
+
+        async function searchApp() {
+            if (isLoading) {
+                alert('正在加载中，请稍候...');
+                return;
+            }
 
             const appId = document.getElementById('appInput').value.trim();
             const country = document.getElementById('countrySelect').value;
 
             if (!appId) {
-                alert('请输入应用名称或App ID');
+                showError('请输入应用名称或App ID');
                 return;
             }
 
             isLoading = true;
             document.getElementById('searchBtn').disabled = true;
-            showLoading();
+            document.getElementById('debugInfo').innerHTML = '';
+            document.getElementById('debugInfo').style.display = 'block';
+            
+            hideAll();
+            document.getElementById('loadingBox').style.display = 'block';
+
+            log('🔍 开始搜索...', { appId, country, apiBase: API_BASE });
 
             try {
-                // 并行请求所有数据
-                const [detailRes, keywordsRes, rankingRes, competitorsRes] = await Promise.all([
-                    fetch(`${API_BASE}/api/app-detail?appId=${encodeURIComponent(appId)}&country=${country}`),
-                    fetch(`${API_BASE}/api/app-keywords?appId=${encodeURIComponent(appId)}&country=${country}`),
-                    fetch(`${API_BASE}/api/app-ranking?appId=${encodeURIComponent(appId)}&country=${country}`),
-                    fetch(`${API_BASE}/api/competitors?appId=${encodeURIComponent(appId)}&country=${country}&limit=10`)
-                ]);
+                // 测试API连接
+                log('📡 测试API路径...');
+                
+                const detailUrl = `${API_BASE}/api/app-detail?appId=${encodeURIComponent(appId)}&country=${country}`;
+                const keywordsUrl = `${API_BASE}/api/app-keywords?appId=${encodeURIComponent(appId)}&country=${country}`;
+                
+                log('📍 请求URL:', { detailUrl, keywordsUrl });
 
+                // 获取应用详情
+                log('🌐 请求应用详情...');
+                const detailRes = await fetch(detailUrl, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                log('✅ 详情响应状态:', { status: detailRes.status, ok: detailRes.ok });
+                
+                if (!detailRes.ok) {
+                    throw new Error(`HTTP ${detailRes.status}: ${detailRes.statusText}`);
+                }
+                
                 const detailData = await detailRes.json();
+                log('📦 详情数据:', detailData);
+
+                // 获取关键词数据
+                log('🌐 请求关键词数据...');
+                const keywordsRes = await fetch(keywordsUrl, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                log('✅ 关键词响应状态:', { status: keywordsRes.status, ok: keywordsRes.ok });
+                
                 const keywordsData = await keywordsRes.json();
-                const rankingData = await rankingRes.json();
-                const competitorsData = await competitorsRes.json();
+                log('📦 关键词数据:', keywordsData);
 
-                if (detailData.success) {
-                    currentAppData = {
-                        detail: detailData.data,
-                        keywords: keywordsData,
-                        ranking: rankingData,
-                        competitors: competitorsData
-                    };
-
-                    displayAppData();
+                if (detailData.success && keywordsData.success) {
+                    log('✨ 数据加载成功，开始显示');
+                    displayData(detailData.data, keywordsData);
                 } else {
-                    alert('未找到该应用，请检查应用名称或ID');
-                    showEmpty();
+                    throw new Error(detailData.error || keywordsData.error || '数据加载失败');
                 }
 
             } catch (error) {
-                console.error('Error:', error);
-                alert('加载失败，请重试');
-                showEmpty();
+                log('❌ 错误:', { message: error.message, stack: error.stack });
+                showError(`加载失败: ${error.message}`);
             } finally {
                 isLoading = false;
                 document.getElementById('searchBtn').disabled = false;
+                document.getElementById('loadingBox').style.display = 'none';
             }
         }
 
-        function displayAppData() {
-            const { detail, keywords, ranking, competitors } = currentAppData;
+        function displayData(detail, keywords) {
+            log('🎨 开始渲染界面');
 
-            // 应用基本信息
-            document.getElementById('appIcon').src = detail.icon;
-            document.getElementById('appName').textContent = detail.appName;
-            document.getElementById('appDeveloper').textContent = detail.developer;
-            document.getElementById('appRating').textContent = detail.rating.toFixed(1);
-            document.getElementById('ratingCount').textContent = detail.ratingCount.toLocaleString();
-            document.getElementById('appCategory').textContent = detail.category;
-            document.getElementById('appPrice').textContent = detail.price > 0 ? `¥${detail.price}` : '免费';
+            // 应用信息
+            document.getElementById('appIcon').src = detail.icon || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
+            document.getElementById('appName').textContent = detail.appName || '未知应用';
+            document.getElementById('appDev').textContent = detail.developer || '未知开发者';
+            document.getElementById('appRating').textContent = (detail.rating || 0).toFixed(1);
+            document.getElementById('appCategory').textContent = detail.category || '未知';
 
             // 统计数据
-            document.getElementById('overallRank').textContent = '#' + (ranking.current?.overallRank || '-');
-            document.getElementById('rankChange').textContent = '↑ 上升 ' + Math.abs(ranking.statistics?.change7days || 0);
-            
-            document.getElementById('keywordCount').textContent = keywords.statistics.total;
-            document.getElementById('kwTop10').textContent = `TOP10: ${keywords.statistics.top10}个`;
-            
-            document.getElementById('totalTraffic').textContent = Math.floor(keywords.statistics.totalTraffic / 30).toLocaleString();
-            
-            document.getElementById('coverageScore').textContent = keywords.statistics.coverageScore;
-            let scoreLevel = '待提升';
-            if (keywords.statistics.coverageScore >= 80) scoreLevel = '优秀';
-            else if (keywords.statistics.coverageScore >= 60) scoreLevel = '良好';
-            document.getElementById('scoreDesc').textContent = scoreLevel;
+            const stats = keywords.statistics || {};
+            document.getElementById('kwCount').textContent = stats.total || 0;
+            document.getElementById('kwTop10').textContent = stats.top10 || 0;
+            document.getElementById('totalTraffic').textContent = (stats.totalTraffic || 0).toLocaleString();
+            document.getElementById('coverage').textContent = stats.coverageScore || 0;
 
             // 关键词列表
-            allKeywords = keywords.keywords || [];
-            displayKeywords(allKeywords);
+            const keywordList = document.getElementById('keywordList');
+            keywordList.innerHTML = '';
 
-            // 竞品列表
-            displayCompetitors(competitors.competitors || []);
+            const kws = keywords.keywords || [];
+            log(`📝 渲染 ${kws.length} 个关键词`);
 
-            // 显示内容
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('appOverview').style.display = 'block';
-            document.getElementById('tabsContainer').style.display = 'block';
-        }
-
-        function displayKeywords(keywords) {
-            const tbody = document.getElementById('keywordsTableBody');
-            tbody.innerHTML = '';
-
-            keywords.forEach(kw => {
-                const tr = document.createElement('tr');
-
-                let rankClass = 'rank-11-50';
-                if (kw.rank <= 3) rankClass = 'rank-1-3';
-                else if (kw.rank <= 10) rankClass = 'rank-4-10';
-
-                let diffClass = 'diff-low';
-                let diffText = '低';
-                if (kw.difficulty >= 70) {
-                    diffClass = 'diff-high';
-                    diffText = '高';
-                } else if (kw.difficulty >= 50) {
-                    diffClass = 'diff-medium';
-                    diffText = '中';
-                }
-
-                const indexPercent = Math.min(100, (kw.searchIndex / 12000) * 100);
-
-                tr.innerHTML = `
-                    <td><span class="keyword-name">${kw.keyword}</span></td>
-                    <td><span class="rank-badge ${rankClass}">#${kw.rank}</span></td>
-                    <td>
-                        <div class="search-index-bar">
-                            <div class="search-index-fill" style="width: ${indexPercent}%"></div>
-                        </div>
-                        <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">${kw.searchIndex.toLocaleString()}</div>
-                    </td>
-                    <td><span class="difficulty-badge ${diffClass}">${diffText} ${kw.difficulty}</span></td>
-                    <td style="color: ${kw.change >= 0 ? '#10b981' : '#ef4444'};">${kw.change > 0 ? '↑' : kw.change < 0 ? '↓' : '→'} ${Math.abs(kw.change)}</td>
-                    <td style="font-weight: 600; color: #3b82f6;">${kw.traffic.toLocaleString()}</td>
-                `;
-
-                tbody.appendChild(tr);
-            });
-        }
-
-        function displayCompetitors(competitors) {
-            const container = document.getElementById('competitorsList');
-            container.innerHTML = '';
-
-            if (competitors.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-title">暂无竞品数据</div></div>';
-                return;
-            }
-
-            competitors.forEach(comp => {
+            kws.slice(0, 20).forEach(kw => {
                 const div = document.createElement('div');
-                div.className = 'competitor-card';
+                div.className = 'keyword-item';
+
+                let rankClass = 'rank-other';
+                if (kw.rank <= 10) rankClass = 'rank-top10';
+                else if (kw.rank <= 20) rankClass = 'rank-top20';
+
                 div.innerHTML = `
-                    <img src="${comp.icon}" class="competitor-icon" alt="${comp.name}">
-                    <div class="competitor-info">
-                        <div class="competitor-name">${comp.name}</div>
-                        <div class="competitor-meta">
-                            ${comp.developer} · ⭐ ${comp.rating.toFixed(1)} · 排名 #${comp.estimatedRank}
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 12px; color: #6b7280;">关键词重叠</div>
-                        <div style="font-size: 20px; font-weight: bold; color: #3b82f6;">${comp.overlap}%</div>
-                    </div>
+                    <div style="font-weight: 600;">${kw.keyword}</div>
+                    <div><span class="rank-badge ${rankClass}">#${kw.rank}</span></div>
+                    <div>${(kw.searchIndex || 0).toLocaleString()}</div>
+                    <div>${kw.difficulty || 0}</div>
+                    <div style="font-weight: 600; color: #3b82f6;">${(kw.traffic || 0).toLocaleString()}</div>
                 `;
-                container.appendChild(div);
+
+                keywordList.appendChild(div);
             });
+
+            hideAll();
+            document.getElementById('resultBox').style.display = 'block';
+            log('✅ 界面渲染完成');
         }
 
-        function filterKeywords(type) {
-            // 更新筛选按钮状态
-            document.querySelectorAll('.filter-chip').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            let filtered = allKeywords;
-
-            switch(type) {
-                case 'top3':
-                    filtered = allKeywords.filter(k => k.rank <= 3);
-                    break;
-                case 'top10':
-                    filtered = allKeywords.filter(k => k.rank <= 10);
-                    break;
-                case 'top20':
-                    filtered = allKeywords.filter(k => k.rank <= 20);
-                    break;
-                case 'high':
-                    filtered = allKeywords.filter(k => k.searchIndex >= 8000);
-                    break;
-                case 'low-diff':
-                    filtered = allKeywords.filter(k => k.difficulty < 50);
-                    break;
-            }
-
-            displayKeywords(filtered);
-        }
-
-        function switchTab(tabName) {
-            // 更新标签按钮
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // 切换内容
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(tabName + 'Tab').classList.add('active');
-
-            // 加载对应数据
-            if (tabName === 'reviews' && currentAppData) {
-                loadReviews();
-            }
-        }
-
-        async function loadReviews() {
-            const reviewsDiv = document.getElementById('reviewsList');
-            reviewsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><div>加载评论中...</div></div>';
-
-            try {
-                const appId = currentAppData.detail.appId;
-                const country = document.getElementById('countrySelect').value;
-                
-                const response = await fetch(`${API_BASE}/api/reviews?appId=${appId}&country=${country}`);
-                const data = await response.json();
-
-                if (data.success && data.reviews.length > 0) {
-                    let html = '<h3 style="margin-bottom: 20px;">最新用户评论</h3>';
-                    
-                    // 情感分析统计
-                    html += `
-                        <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-                                <div>
-                                    <div style="font-size: 12px; color: #6b7280;">总评论数</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #1f2937;">${data.sentiment.total}</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 12px; color: #6b7280;">好评率</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #10b981;">${data.sentiment.positiveRate}%</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 12px; color: #6b7280;">好评</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #10b981;">${data.sentiment.positive}</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 12px; color: #6b7280;">差评</div>
-                                    <div style="font-size: 24px; font-weight: bold; color: #ef4444;">${data.sentiment.negative}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                    // 评论列表
-                    data.reviews.forEach(review => {
-                        const stars = '⭐'.repeat(review.rating);
-                        html += `
-                            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 12px;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                    <div>
-                                        <span style="font-weight: 600;">${review.author}</span>
-                                        <span style="margin-left: 10px; color: #f59e0b;">${stars}</span>
-                                    </div>
-                                    <div style="font-size: 12px; color: #6b7280;">${new Date(review.date).toLocaleDateString()}</div>
-                                </div>
-                                <div style="font-weight: 600; margin-bottom: 6px;">${review.title}</div>
-                                <div style="color: #6b7280; line-height: 1.6;">${review.content}</div>
-                                ${review.version ? `<div style="font-size: 11px; color: #9ca3af; margin-top: 8px;">版本 ${review.version}</div>` : ''}
-                            </div>
-                        `;
-                    });
-
-                    reviewsDiv.innerHTML = html;
-                } else {
-                    reviewsDiv.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">💬</div>
-                            <div class="empty-title">暂无评论数据</div>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Load reviews error:', error);
-                reviewsDiv.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-title">加载失败</div>
-                        <div class="empty-desc">${error.message}</div>
-                    </div>
-                `;
-            }
-        }
-
-        function showLoading() {
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('appOverview').style.display = 'none';
-            document.getElementById('tabsContainer').style.display = 'none';
-            document.getElementById('loadingState').style.display = 'block';
-        }
-
-        function showEmpty() {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('appOverview').style.display = 'none';
-            document.getElementById('tabsContainer').style.display = 'none';
+        function showError(message) {
+            const errorBox = document.getElementById('errorBox');
+            errorBox.textContent = '❌ ' + message;
+            errorBox.style.display = 'block';
+            
+            hideAll();
             document.getElementById('emptyState').style.display = 'block';
+        }
+
+        function hideAll() {
+            document.getElementById('errorBox').style.display = 'none';
+            document.getElementById('loadingBox').style.display = 'none';
+            document.getElementById('resultBox').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
         }
 
         // 回车搜索
         document.getElementById('appInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                searchApp(e);
-            }
+            if (e.key === 'Enter') searchApp();
         });
+
+        // 页面加载时显示API信息
+        window.onload = function() {
+            log('🚀 页面加载完成', {
+                apiBase: API_BASE,
+                location: window.location.href
+            });
+        };
     </script>
 </body>
 </html>
