@@ -297,6 +297,7 @@
             border-bottom: 1px solid var(--gray-100);
             padding: 0 24px;
             gap: 8px;
+            overflow-x: auto;
         }
         
         .tab-btn {
@@ -497,6 +498,7 @@
             justify-content: center;
             gap: 8px;
             margin-top: 24px;
+            flex-wrap: wrap;
         }
         
         .page-btn {
@@ -520,6 +522,17 @@
             background: var(--primary);
             border-color: var(--primary);
             color: white;
+        }
+        
+        .page-btn-showall {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .page-btn-showall:hover {
+            background: linear-gradient(135deg, #059669, #047857);
         }
         
         /* 加载状态 */
@@ -593,11 +606,6 @@
             
             .stats-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .tabs-header {
-                overflow-x: auto;
-                padding: 0 12px;
             }
             
             .nav-links {
@@ -827,7 +835,7 @@
         let allKeywords = [];
         let filteredKeywords = [];
         let currentPage = 1;
-        const itemsPerPage = 20;
+        let itemsPerPage = 20;
         let isLoading = false;
 
         // 搜索应用
@@ -849,10 +857,9 @@
             showLoading();
 
             try {
-                // 并行请求所有数据
                 const [detailRes, keywordsRes] = await Promise.all([
                     fetch(`${API_BASE}/api/app-detail?appId=${encodeURIComponent(appId)}&country=${country}`),
-                    fetch(`${API_BASE}/api/app-keywords?appId=${encodeURIComponent(appId)}&country=${country}`)
+                    fetch(`${API_BASE}/api/app-keywords?appId=${encodeURIComponent(appId)}&country=${country}&limit=100`)
                 ]);
 
                 const detailData = await detailRes.json();
@@ -866,12 +873,4 @@
 
                     displayAppData();
                 } else {
-                    throw new Error(detailData.error || keywordsData.error || '获取数据失败');
-                }
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert('加载失败: ' + error.message);
-                showEmpty();
-            } finally {
-                isLoading = false;
+                    throw
