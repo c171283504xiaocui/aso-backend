@@ -3,376 +3,696 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASO数据分析平台 - 调试版</title>
+    <title>ASO数据分析平台 - 专业版</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #6b7280;
+            --gray-900: #1f2937;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f7fa;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .search-box {
+        
+        .navbar {
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--gray-900);
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+        
+        .search-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .search-title {
+            font-size: 16px;
+            font-weight: 600;
             margin-bottom: 20px;
+            color: var(--gray-900);
         }
-        .input-group {
+        
+        .search-form {
             display: grid;
-            grid-template-columns: 2fr 1fr auto;
-            gap: 10px;
-            margin-bottom: 15px;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 12px;
         }
-        input, select, button {
-            padding: 12px;
-            border: 2px solid #e5e7eb;
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+        }
+        
+        .form-input, .form-select {
+            padding: 12px 14px;
+            border: 1px solid var(--gray-200);
             border-radius: 8px;
             font-size: 14px;
         }
-        button {
-            background: #3b82f6;
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn-search {
+            padding: 12px 32px;
+            background: var(--primary);
             color: white;
             border: none;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
+            align-self: flex-end;
         }
-        button:disabled {
+        
+        .btn-search:hover:not(:disabled) {
+            background: var(--primary-dark);
+        }
+        
+        .btn-search:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .debug-box {
-            background: #f0f9ff;
-            border: 2px solid #bae6fd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-family: monospace;
-            font-size: 13px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .log-item {
-            padding: 8px;
-            margin-bottom: 5px;
-            border-radius: 4px;
+        
+        .app-overview {
             background: white;
-        }
-        .log-success { border-left: 4px solid #10b981; }
-        .log-error { border-left: 4px solid #ef4444; background: #fee; }
-        .log-info { border-left: 4px solid #3b82f6; }
-        .result-box {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             display: none;
         }
-        .app-info {
+        
+        .app-header {
             display: flex;
+            gap: 24px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 28px;
+        }
+        
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 26px;
+            object-fit: cover;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        .app-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .app-developer {
+            color: var(--gray-600);
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+        
+        .app-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            display: inline-flex;
             align-items: center;
-            gap: 20px;
-            padding: 20px;
-            background: #f9fafb;
+            gap: 6px;
+            padding: 8px 14px;
             border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .badge-rating { background: #fef3c7; color: #92400e; }
+        .badge-category { background: #e0e7ff; color: #3730a3; }
+        .badge-free { background: #d1fae5; color: #065f46; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: var(--gray-600);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--gray-900);
+        }
+        
+        .keywords-section {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
             margin-bottom: 20px;
         }
-        .app-icon {
-            width: 100px;
-            height: 100px;
-            border-radius: 20px;
-            object-fit: cover;
+        
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
         }
-        .loading {
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table thead {
+            background: var(--gray-50);
+        }
+        
+        .data-table th {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        
+        .data-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 14px;
+        }
+        
+        .data-table tr:hover {
+            background: var(--gray-50);
+        }
+        
+        .keyword-name {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .rank-1-3 { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
+        .rank-4-10 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        .rank-11-20 { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e3a8a; }
+        .rank-21-50 { background: var(--gray-200); color: var(--gray-600); }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .page-btn {
+            padding: 8px 14px;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+        }
+        
+        .page-btn:hover:not(.active) {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .page-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .page-btn-showall {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .loading-overlay {
+            background: white;
+            border-radius: 16px;
+            padding: 60px 20px;
             text-align: center;
-            padding: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: none;
         }
+        
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top-color: #3b82f6;
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--gray-100);
+            border-top-color: var(--primary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
         }
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        
+        .empty-state {
+            background: white;
+            border-radius: 16px;
+            padding: 80px 20px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
+        
+        .empty-icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+            opacity: 0.6;
         }
-        th {
-            background: #f9fafb;
+        
+        .empty-title {
+            font-size: 20px;
             font-weight: 600;
+            margin-bottom: 8px;
         }
-        .rank-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 12px;
+        
+        .empty-desc {
+            color: var(--gray-600);
+            font-size: 14px;
         }
-        .rank-top10 { background: #d1fae5; color: #065f46; }
-        .rank-top20 { background: #fef3c7; color: #92400e; }
-        .rank-other { background: #e5e7eb; color: #374151; }
+        
+        @media (max-width: 768px) {
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            .app-header {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">📊</div>
+                <span>ASO数据分析平台</span>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
-        <div class="header">
-            <h1>📊 ASO数据分析平台 - 调试版</h1>
-            <p>实时显示所有请求和错误信息</p>
+        <div class="search-panel">
+            <h2 class="search-title">🔍 应用搜索分析</h2>
+            <form class="search-form" onsubmit="return searchApp(event)">
+                <div class="form-group">
+                    <label class="form-label">应用名称 / App ID</label>
+                    <input type="text" 
+                           class="form-input" 
+                           id="appInput"
+                           placeholder="输入应用名称或App ID（如：微信、414478124）"
+                           required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">应用商店</label>
+                    <select class="form-select" id="storeSelect">
+                        <option value="appstore">App Store</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">国家/地区</label>
+                    <select class="form-select" id="countrySelect">
+                        <option value="cn">🇨🇳 中国</option>
+                        <option value="us">🇺🇸 美国</option>
+                        <option value="jp">🇯🇵 日本</option>
+                        <option value="kr">🇰🇷 韩国</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-search" id="searchBtn">
+                    搜索分析
+                </button>
+            </form>
         </div>
 
-        <div class="search-box">
-            <div class="input-group">
-                <input type="text" id="appInput" placeholder="输入应用名称或App ID（如：微信、414478124）">
-                <select id="countrySelect">
-                    <option value="cn">🇨🇳 中国</option>
-                    <option value="us">🇺🇸 美国</option>
-                    <option value="jp">🇯🇵 日本</option>
-                </select>
-                <button id="searchBtn" onclick="searchApp()">搜索分析</button>
-            </div>
+        <div id="loadingState" class="loading-overlay">
+            <div class="spinner"></div>
+            <div style="color: var(--gray-600);">正在分析应用数据，请稍候...</div>
         </div>
 
-        <div class="debug-box" id="debugBox">
-            <strong>调试日志：</strong>
-            <div id="debugLogs"></div>
-        </div>
-
-        <div id="loadingBox" class="result-box">
-            <div class="loading">
-                <div class="spinner"></div>
-                <div>正在加载数据...</div>
-            </div>
-        </div>
-
-        <div id="resultBox" class="result-box">
-            <div class="app-info">
+        <div id="appOverview" class="app-overview">
+            <div class="app-header">
                 <img id="appIcon" class="app-icon" src="" alt="App Icon">
-                <div>
-                    <h2 id="appName">应用名称</h2>
-                    <div id="appDev" style="color: #6b7280;">开发者</div>
-                    <div style="margin-top: 10px;">
-                        ⭐ <strong id="appRating">0</strong> |
-                        📁 <strong id="appCategory">分类</strong> |
-                        🔑 <strong id="kwCount">0</strong> 个关键词
+                <div style="flex: 1;">
+                    <h1 class="app-name" id="appName">应用名称</h1>
+                    <div class="app-developer" id="appDeveloper">开发者</div>
+                    <div class="app-badges">
+                        <span class="badge badge-rating">
+                            ⭐ <span id="appRating">0</span>
+                        </span>
+                        <span class="badge badge-category">
+                            📁 <span id="appCategory">分类</span>
+                        </span>
+                        <span class="badge badge-free" id="priceBadge">
+                            💰 <span id="appPrice">免费</span>
+                        </span>
                     </div>
                 </div>
             </div>
 
-            <h3 style="margin: 20px 0 15px 0;">关键词列表</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>关键词</th>
-                        <th>排名</th>
-                        <th>搜索指数</th>
-                        <th>难度</th>
-                        <th>流量/日</th>
-                    </tr>
-                </thead>
-                <tbody id="keywordsTable">
-                </tbody>
-            </table>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">🔑 关键词覆盖</div>
+                    <div class="stat-value" id="kwTotal">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🏆 TOP 10 关键词</div>
+                    <div class="stat-value" id="kwTop10">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">📈 预估日流量</div>
+                    <div class="stat-value" id="dailyTraffic">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">💯 覆盖度评分</div>
+                    <div class="stat-value" id="coverageScore">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="keywordsSection" class="keywords-section">
+            <h3 class="section-title">关键词列表</h3>
+            
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>关键词</th>
+                            <th style="width: 100px;">排名</th>
+                            <th style="width: 120px;">搜索指数</th>
+                            <th style="width: 100px;">难度</th>
+                            <th style="width: 120px;">预估流量/日</th>
+                        </tr>
+                    </thead>
+                    <tbody id="keywordsTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="pagination" class="pagination"></div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-title">开始分析应用</div>
+            <div class="empty-desc">
+                输入应用名称或App ID，获取完整的ASO数据分析<br>
+                例如：微信、抖音、414478124
+            </div>
         </div>
     </div>
 
     <script>
         const API_BASE = window.location.origin;
-        let isLoading = false;
+        let allKeywords = [];
+        let currentPage = 1;
+        let itemsPerPage = 20;
 
-        function log(message, type = 'info', data = null) {
-            const logsDiv = document.getElementById('debugLogs');
-            const logItem = document.createElement('div');
-            logItem.className = `log-item log-${type}`;
-            
-            const time = new Date().toLocaleTimeString();
-            let content = `[${time}] ${message}`;
-            
-            if (data) {
-                content += '\n' + JSON.stringify(data, null, 2).substring(0, 500);
-            }
-            
-            logItem.textContent = content;
-            logsDiv.appendChild(logItem);
-            logsDiv.scrollTop = logsDiv.scrollHeight;
-            
-            console.log(message, data);
-        }
-
-        async function searchApp() {
-            if (isLoading) {
-                log('⚠️ 请求正在进行中，请等待...', 'info');
-                return;
-            }
+        async function searchApp(event) {
+            event.preventDefault();
 
             const appId = document.getElementById('appInput').value.trim();
             const country = document.getElementById('countrySelect').value;
 
             if (!appId) {
-                log('❌ 请输入应用名称或ID', 'error');
                 alert('请输入应用名称或App ID');
-                return;
+                return false;
             }
 
-            isLoading = true;
             document.getElementById('searchBtn').disabled = true;
-            document.getElementById('debugLogs').innerHTML = '';
-            
-            log('🚀 开始搜索...', 'info', { appId, country, apiBase: API_BASE });
-
-            // 显示加载状态
-            document.getElementById('resultBox').style.display = 'none';
-            document.getElementById('loadingBox').style.display = 'block';
+            showLoading();
 
             try {
-                // 构建API URL
-                const detailUrl = `${API_BASE}/api/app-detail?appId=${encodeURIComponent(appId)}&country=${country}`;
-                const keywordsUrl = `${API_BASE}/api/app-keywords?appId=${encodeURIComponent(appId)}&country=${country}&limit=100`;
-                
-                log('📍 API URL:', 'info', { detailUrl, keywordsUrl });
-
-                // 请求应用详情
-                log('🌐 请求应用详情...', 'info');
-                const detailRes = await fetch(detailUrl);
-                log('✅ 详情响应:', 'success', { 
-                    status: detailRes.status, 
-                    ok: detailRes.ok,
-                    statusText: detailRes.statusText 
-                });
-
-                if (!detailRes.ok) {
-                    const errorText = await detailRes.text();
-                    log('❌ 详情请求失败', 'error', { status: detailRes.status, error: errorText });
-                    throw new Error(`应用详情请求失败: ${detailRes.status}`);
-                }
+                const [detailRes, keywordsRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/app-detail?appId=${encodeURIComponent(appId)}&country=${country}`),
+                    fetch(`${API_BASE}/api/app-keywords?appId=${encodeURIComponent(appId)}&country=${country}&limit=100`)
+                ]);
 
                 const detailData = await detailRes.json();
-                log('📦 详情数据:', 'success', detailData);
-
-                if (!detailData.success) {
-                    throw new Error(detailData.error || '应用不存在');
-                }
-
-                // 请求关键词数据
-                log('🌐 请求关键词数据...', 'info');
-                const keywordsRes = await fetch(keywordsUrl);
-                log('✅ 关键词响应:', 'success', { 
-                    status: keywordsRes.status, 
-                    ok: keywordsRes.ok 
-                });
-
-                if (!keywordsRes.ok) {
-                    const errorText = await keywordsRes.text();
-                    log('❌ 关键词请求失败', 'error', { status: keywordsRes.status, error: errorText });
-                    throw new Error(`关键词请求失败: ${keywordsRes.status}`);
-                }
-
                 const keywordsData = await keywordsRes.json();
-                log('📦 关键词数据:', 'success', { 
-                    total: keywordsData.keywords?.length,
-                    statistics: keywordsData.statistics 
-                });
 
-                if (!keywordsData.success) {
-                    throw new Error(keywordsData.error || '关键词获取失败');
+                if (detailData.success && keywordsData.success) {
+                    displayResults(detailData.data, keywordsData);
+                } else {
+                    throw new Error(detailData.error || keywordsData.error || '获取数据失败');
                 }
-
-                // 显示结果
-                log('✨ 开始渲染界面...', 'success');
-                displayResults(detailData.data, keywordsData);
-
             } catch (error) {
-                log('❌ 错误:', 'error', { 
-                    message: error.message, 
-                    stack: error.stack 
-                });
+                console.error('Error:', error);
                 alert('加载失败: ' + error.message);
-                document.getElementById('loadingBox').style.display = 'none';
+                showEmpty();
             } finally {
-                isLoading = false;
                 document.getElementById('searchBtn').disabled = false;
             }
+
+            return false;
         }
 
         function displayResults(detail, keywords) {
-            log('🎨 渲染应用信息...', 'info');
-
             // 应用信息
             document.getElementById('appIcon').src = detail.icon;
             document.getElementById('appName').textContent = detail.appName;
-            document.getElementById('appDev').textContent = detail.developer;
+            document.getElementById('appDeveloper').textContent = detail.developer;
             document.getElementById('appRating').textContent = detail.rating.toFixed(1);
             document.getElementById('appCategory').textContent = detail.category;
-            document.getElementById('kwCount').textContent = keywords.keywords.length;
+            document.getElementById('appPrice').textContent = detail.price > 0 ? `¥${detail.price}` : '免费';
 
-            // 关键词表格
-            const tbody = document.getElementById('keywordsTable');
+            // 统计数据
+            const stats = keywords.statistics;
+            document.getElementById('kwTotal').textContent = stats.total;
+            document.getElementById('kwTop10').textContent = stats.top10;
+            document.getElementById('dailyTraffic').textContent = Math.floor(stats.totalTraffic / 30).toLocaleString();
+            document.getElementById('coverageScore').textContent = stats.coverageScore;
+
+            // 关键词数据
+            allKeywords = keywords.keywords || [];
+            currentPage = 1;
+            itemsPerPage = 20;
+            
+            displayKeywords();
+
+            // 显示结果
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('appOverview').style.display = 'block';
+            document.getElementById('keywordsSection').style.display = 'block';
+        }
+
+        function displayKeywords() {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageKeywords = allKeywords.slice(start, end);
+
+            const tbody = document.getElementById('keywordsTableBody');
             tbody.innerHTML = '';
 
-            log(`📝 渲染 ${keywords.keywords.length} 个关键词`, 'info');
-
-            keywords.keywords.slice(0, 50).forEach(kw => {
+            pageKeywords.forEach(kw => {
                 const tr = document.createElement('tr');
 
-                let rankClass = 'rank-other';
-                if (kw.rank <= 10) rankClass = 'rank-top10';
-                else if (kw.rank <= 20) rankClass = 'rank-top20';
+                let rankClass = 'rank-21-50';
+                if (kw.rank <= 3) rankClass = 'rank-1-3';
+                else if (kw.rank <= 10) rankClass = 'rank-4-10';
+                else if (kw.rank <= 20) rankClass = 'rank-11-20';
 
                 tr.innerHTML = `
-                    <td><strong>${kw.keyword}</strong></td>
+                    <td><span class="keyword-name">${kw.keyword}</span></td>
                     <td><span class="rank-badge ${rankClass}">#${kw.rank}</span></td>
                     <td>${kw.searchIndex.toLocaleString()}</td>
                     <td>${kw.difficulty}</td>
-                    <td style="font-weight: 600; color: #3b82f6;">${kw.traffic.toLocaleString()}</td>
+                    <td style="font-weight: 600; color: var(--primary);">${kw.traffic.toLocaleString()}</td>
                 `;
 
                 tbody.appendChild(tr);
             });
 
-            // 显示结果
-            document.getElementById('loadingBox').style.display = 'none';
-            document.getElementById('resultBox').style.display = 'block';
-
-            log('✅ 渲染完成！', 'success');
+            updatePagination();
         }
 
-        // 回车搜索
-        document.getElementById('appInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchApp();
-            }
-        });
+        function updatePagination() {
+            const totalPages = Math.ceil(allKeywords.length / itemsPerPage);
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
 
-        // 页面加载时显示信息
-        window.onload = function() {
-            log('🚀 页面加载完成', 'success', {
-                apiBase: API_BASE,
-                location: window.location.href
-            });
-        };
+            if (totalPages <= 1 && allKeywords.length <= itemsPerPage) return;
+
+            // 上一页
+            if (currentPage > 1) {
+                const prevBtn = createButton('← 上一页', () => {
+                    currentPage--;
+                    displayKeywords();
+                });
+                paginationDiv.appendChild(prevBtn);
+            }
+
+            // 页码
+            if (totalPages > 1) {
+                for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                    const pageBtn = createButton(i, () => {
+                        currentPage = i;
+                        displayKeywords();
+                    }, i === currentPage);
+                    paginationDiv.appendChild(pageBtn);
+                }
+            }
+
+            // 下一页
+            if (currentPage < totalPages) {
+                const nextBtn = createButton('下一页 →', () => {
+                    currentPage++;
+                    displayKeywords();
+                });
+                paginationDiv.appendChild(nextBtn);
+            }
+
+            // 显示全部
+            if (allKeywords.length > 20 && itemsPerPage !== allKeywords.length) {
+                const showAllBtn = createButton(`📋 显示全部 (${allKeywords.length}个)`, () => {
+                    itemsPerPage = allKeywords.length;
+                    currentPage = 1;
+                    displayKeywords();
+                });
+                showAllBtn.className = 'page-btn page-btn-showall';
+                paginationDiv.appendChild(showAllBtn);
+            }
+
+            // 恢复分页
+            if (itemsPerPage === allKeywords.length && allKeywords.length > 20) {
+                const resetBtn = createButton('📄 恢复分页', () => {
+                    itemsPerPage = 20;
+                    currentPage = 1;
+                    displayKeywords();
+                });
+                paginationDiv.appendChild(resetBtn);
+            }
+        }
+
+        function createButton(text, onClick, active = false) {
+            const btn = document.createElement('button');
+            btn.className = 'page-btn' + (active ? ' active' : '');
+            btn.textContent = text;
+            btn.onclick = onClick;
+            return btn;
+        }
+
+        function showLoading() {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('appOverview').style.display = 'none';
+            document.getElementById('keywordsSection').style.display = 'none';
+            document.getElementById('loadingState').style.display = 'block';
+        }
+
+        function showEmpty() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('appOverview').style.display = 'none';
+            document.getElementById('keywordsSection').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'block';
+        }
     </script>
 </body>
 </html>
